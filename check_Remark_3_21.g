@@ -1,6 +1,5 @@
 #############################################################################
 ##  check_Remark_3_21.g
-##
 ##  Symbolic verification of Remark 3.21 in the paper on ideals in
 ##  3-generated primitive axial algebras of Jordan type 1/2.
 ##
