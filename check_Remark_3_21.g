@@ -15,6 +15,8 @@
 ##    3. Q is never identically zero when zeta <> +-1.
 ##  Hence the number of roots [x:y] of Q in P^1(F) is 2, 0 or 1 according
 ##  as psi^2 - alpha beta gamma is a nonzero square, a non-square, or 0.
+##  Finally, we check every number in the Example after Remark 3.21
+##  (zeta = 3, beta = 1/5, psi = 1/7 over Q).
 #############################################################################
 
 zeta  := Indeterminate(Rationals, "zeta");;
@@ -57,5 +59,22 @@ Print("   (so if A0 = A1 = A2 = 0 then beta = 0 and zeta^2 = 1, impossible)\n");
 d := Value(psi^2 - alpha*beta*gamma, [zeta,beta,psi], [3,1/5,1/7]);;
 Report("example zeta=3, beta=1/5, psi=1/7: psi^2 - alpha beta gamma = 953/11025",
   d = 953/11025);
+
+Report("example: alpha = 4/3 and gamma = 1 - alpha - beta + 2 psi = -26/105",
+  Value(alpha,[zeta],[3]) = 4/3 and Value(gamma,[zeta,beta,psi],[3,1/5,1/7]) = -26/105);
+Report("example: 953 is not a square (953 is prime)",
+  RootInt(953)^2 <> 953 and IsPrimeInt(953));
+## The roots of Q in the example (Example after Remark 3.21):
+## Q(x,1) is a nonzero multiple of 17 x^2 - x - 14, whose roots are
+## (1 +- sqrt(953))/34, and Q(1,0) <> 0, so [1:0] is not a root.
+vals := [3, 1/5, 1/7];;
+Qex  := Value(Q,  [zeta,beta,psi,y], Concatenation(vals,[1]));;
+A2ex := Value(A2, [zeta,beta,psi], vals);;
+Report("example: Q(x,1) is a nonzero multiple of 17 x^2 - x - 14",
+  A2ex <> 0 and Same(17*Qex/A2ex, 17*x^2 - x - 14));
+Report("example: discriminant of 17 x^2 - x - 14 is 953",
+  (-1)^2 - 4*17*(-14) = 953);
+Report("example: (1 +- sqrt 953)/34 are the roots of 17 x^2 - x - 14",
+  ForAll([1,-1], e -> 17*((1+e*Sqrt(953))/34)^2 - (1+e*Sqrt(953))/34 - 14 = 0));
 
 Print("\nALL CHECKS PASSED: ", ForAll(results, r -> r = true), "\n");
