@@ -1,6 +1,6 @@
 #############################################################################
 ##  check_Section_4.g
-##
+#
 ##  Symbolic verification of Lemma 4.1, Lemma 4.2 and Example 4.4 in the
 ##  paper on ideals in 3-generated primitive axial algebras of Jordan
 ##  type 1/2.  The setup (Sections 2-3.1, Lemma 3.15) is checked silently
