@@ -1,64 +1,66 @@
-# Ideals in 3-generated primitive axial algebras of Jordan type ½ — computer calculations
+# Ideals of 3-generated primitive axial algebras of Jordan type 1/2
 
-This repository contains the GAP code verifying the computations in the paper
+GAP code verifying the computations in the paper
 
-> *[Title of the paper]*, [Author(s)], [arXiv / journal reference].
+> Karwan Abdalla, **The lattice of ideals of 3-generated primitive axial algebras of Jordan type 1/2**.
 
-All checks are **symbolic**: the parameters ζ, β, γ, ψ (with α = (ζ+1)²/(4ζ))
-and the auxiliary variables are indeterminates over ℚ, so each verified
-identity holds for all parameter values (with ζ ≠ 0, ±1), over every field of
-characteristic different from 2.
+The paper studies the 9-dimensional universal algebra A(α, β, γ, ψ) of Gorshkov and Staroletov
+(J. Algebra 563 (2020), 74–99), with basis
+
+    a, b, c, ab, bc, ac, p = a(bc), q = b(ac), r = c(ab)
+
+in this order. The multiplication table is taken from [GS, Table 1] and the Gram matrix of the
+Frobenius form from [GS, Table 5]; the associativity of the form is verified in `check_main.g`,
+which also checks the transcription of both tables.
 
 ## Requirements
 
-[GAP](https://www.gap-system.org) 4.12 or later (tested with GAP 4.15.1).
-No additional packages are needed.
+- [GAP](https://www.gap-system.org) 4.15.1 (the files use only the standard library;
+  the MeatAxe, used in `check_hidden_toric.g`, is part of it).
 
 ## How to run
 
-Start GAP in the folder containing the files and type, for example,
+Download a file and read it into GAP, for example
 
-```
-Read("check_Lemma_3_15.g");
+```gap
+Read(Filename(DirectoryHome(), "Downloads/check_main.g"));
 ```
 
-Each file prints one line per check, followed by
+Every file is self-contained, prints one line per check, and ends with
 
 ```
 ALL CHECKS PASSED: true
 ```
 
-Running times range from a few seconds (`check_Remark_3_21.g`) to a few
-minutes (`check_main.g`).
-
 ## Files
 
-| File | Results verified in the paper |
+Parameters are treated as indeterminates wherever possible, so the checks hold identically,
+for all parameter values, over every field of characteristic not 2.
+
+| File | Verifies |
 |---|---|
-| `check_permutation_symmetry.g` | Remark 2.21: the universal algebra is symmetric under all permutations of the generators *a, b, c* |
-| `check_Lemma_3_15.g` | Lemma 3.15 (the operator C_W), and all computations of Section 3.1: Proposition 2.23, Lemma 3.2, Proposition 3.3, Lemma 3.13, Remark 3.14 |
-| `check_Props_3_18-3_22.g` | Propositions 3.18–3.22: the ideals M_[x:y], D₁⊕M_[x:y], D₀⊕M_[x:y], D₀⊕D₁⊕M_[x:y] |
-| `check_Remark_3_21.g` | Remark 3.21 (the discriminant of the quadratic form Q) and Example 4.5 |
-| `check_Prop_3_23_Lemma_3_24.g` | Proposition 3.23 and Lemma 3.24 (the B-component C_B on W) |
-| `check_Section_4.g` | Lemma 4.1, Lemma 4.2 and Example 4.4 |
-| `check_main.g` | **All of the above in one file**, together with the remaining computations of Sections 3–4 (the cases L = 0 and L = X, Lemma 3.25, Proposition 3.32) |
+| `check_permutation_symmetry.g` | Remark 2.21 (symmetry under permutations of a, b, c) |
+| `check_Lemma_3_15.g` | Section 3.1 and Lemma 3.15 (the operator C_W) |
+| `check_Props_3_18-3_22.g` | Propositions 3.18–3.22 |
+| `check_Remark_3_21.g` | Remark 3.21 and Example 4.5 |
+| `check_Prop_3_23_Lemma_3_24.g` | Proposition 3.23 and Lemma 3.24 |
+| `check_Section_4.g` | Lemmas 4.1 and 4.2 and Example 4.4 |
+| `check_hidden_toric.g` | Section 4.4: Lemma 4.7, Table 1, Corollary 4.8 and Remark 4.9 |
+| `check_main.g` | all computations of Sections 3 and 4.1–4.3 in one file |
 
-The files other than `check_permutation_symmetry.g` and
-`check_Remark_3_21.g` first rebuild the setup of Section 3.1 and check it
-silently; the detailed checks of that setup are in `check_Lemma_3_15.g`.
+`check_hidden_toric.g` consists of five parts:
 
-## Conventions
+1. symbolic: τ_a and τ_c are automorphisms preserving the form, and the new form values of Lemma 4.7;
+2. the four algebras of Table 1: new parameters, and a direct check that A is isomorphic to the
+   universal algebra for the new triple (all 81 products);
+3. cross-check of Corollary 4.8 by listing all ideals over GF(5), GF(7), GF(11), GF(13) with the MeatAxe;
+4. characteristic 3: the Miyamoto closure of {a, b, c} has 18 axes and contains no toric pair (Remark 4.9);
+5. the two 3-dimensional ideals of Corollary 4.8(a) are defined over Z[1/2], hence over every
+   field of characteristic not 2.
 
-* The multiplication table of the universal algebra A(α, β, γ, ψ) is
-  transcribed from Gorshkov–Staroletov, *J. Algebra* 563 (2020), Table 1,
-  and the Frobenius form from Table 5 of the same paper. As a check of the
-  transcription, the code verifies the Jordan identity, the eigenvalues of
-  ad_a, and the associativity of the form on all 729 triples of basis
-  elements.
-* Basis order of A (as in Gorshkov–Staroletov):
-  a, b, c, ab, bc, ac, a(bc), b(ac), c(ab).
-* The basis (e₁, …, e₆) of W = B^⊥ is e₁ = c°, e₂ = (bc)°, e₃ = (ac)°,
-  e₄ = a(bc)°, e₅ = b(ac)°, e₆ = c(ab)°, where x° is the projection of x
-  onto W.
-* Normalization of the toric basis {s, 1_B, t} of B = ⟨⟨a, b⟩⟩:
-  a = d₁ and b = d_{1/ζ}, where d_ξ = ξ s + ½ 1_B + ξ⁻¹ t.
+It runs in about 3–4 minutes.
+
+## Reference
+
+[GS] I. Gorshkov, A. Staroletov, On primitive 3-generated axial algebras of Jordan type,
+J. Algebra 563 (2020), 74–99. https://doi.org/10.1016/j.jalgebra.2020.07.014
