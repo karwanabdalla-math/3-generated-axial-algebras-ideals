@@ -1,6 +1,6 @@
 #############################################################################
 ##  check_main.g
-##
+###
 ##  Symbolic verification of the computations in Sections 3 and 4.1-4.3
 ##  of the paper on ideals in 3-generated primitive axial algebras of
 ##  Jordan type 1/2.  Part 0 checks the transcription of [GS, Tables 1
