@@ -1,10 +1,13 @@
 #############################################################################
 ##  check_main.g
 ##
-##  Symbolic verification of all computations in Sections 3 and 4 of the
-##  paper on ideals in 3-generated primitive axial algebras of Jordan
-##  type 1/2.  Parts 0-5 cover Section 3.1; Parts 6-15 cover
-##  Sections 3.4-3.7 and Section 4.
+##  Symbolic verification of the computations in Sections 3 and 4.1-4.3
+##  of the paper on ideals in 3-generated primitive axial algebras of
+##  Jordan type 1/2.  Part 0 checks the transcription of [GS, Tables 1
+##  and 5] (Table 1 of the paper) via the Frobenius property; Parts 1-5
+##  cover Section 3.1; Parts 6-15 cover Sections 3.4-3.7 and 4.1-4.3.
+##  Section 4.4 is verified in check_hidden_toric.g, Example 4.5 in
+##  check_Remark_3_21.g, and Section 5 in check_Section_5_*.g.
 ##
 ##  Parameters: zeta, beta, gamma, psi are indeterminates, and
 ##      alpha = (zeta+1)^2/(4 zeta),
@@ -189,7 +192,7 @@ Report("(a,a) = (b,b) = (c,c) = 1",
   ForAll([1,2,3], i -> Same(G[i][i], 1)));
 
 #############################################################################
-Print("\n--- 1. The toric basis {s, 1_B, t} of B (Proposition 2.23) ---\n");
+Print("\n--- 1. The toric basis {s, 1_B, t} of B (Proposition 2.24) ---\n");
 #############################################################################
 a := E9(1);; b := E9(2);; c := E9(3);; ab := E9(4);;
 one := (2/(alpha-1)) * (ab - a/2 - b/2);;          # 1_B
@@ -521,7 +524,7 @@ Report("Sigma = alpha(alpha-1)(16 P - N^2)/4",
   Same(SigmaP, alpha*(alpha-1)*(16*PPc - NNc^2)/4));
 Report("c_B^2 = N c_B + (4P - N^2/4) 1_B",
   Same(M(cB,cB), NNc*cB + (4*PPc - NNc^2/4)*one));
-Report("d_xi = xi s + 1_B/2 + t/xi is an idempotent of B (Prop 2.23)",
+Report("d_xi = xi s + 1_B/2 + t/xi is an idempotent of B (Prop 2.24)",
   Same(M(xi*s + one/2 + t/xi, xi*s + one/2 + t/xi), xi*s + one/2 + t/xi));
 
 #############################################################################
