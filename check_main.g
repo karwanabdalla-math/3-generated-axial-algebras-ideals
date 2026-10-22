@@ -1,11 +1,12 @@
 #############################################################################
 ##  check_main.g
-###
+##
 ##  Symbolic verification of the computations in Sections 3 and 4.1-4.3
 ##  of the paper on ideals in 3-generated primitive axial algebras of
 ##  Jordan type 1/2.  Part 0 checks the transcription of [GS, Tables 1
 ##  and 5] (Table 1 of the paper) via the Frobenius property; Parts 1-5
-##  cover Section 3.1; Parts 6-15 cover Sections 3.4-3.7 and 4.1-4.3.
+##  cover Section 3.1; Parts 6-15 cover Sections 3.4-3.7 and 4.1-4.3;
+##  Part 16 covers the descent result (Proposition 4.6).
 ##  Section 4.4 is verified in check_hidden_toric.g, Example 4.5 in
 ##  check_Remark_3_21.g, and Section 5 in check_Section_5_*.g.
 ##
@@ -559,5 +560,35 @@ Report("Prop 3.32: c(bc), c(ac), c r as in [GS, Table 1]",
   and Same(M(c,E9(9)), (psi/2)*c + E9(9)/2));
 Report("Prop 3.32: beta=gamma=psi=0 => B-projections of ac,bc,p,q,r vanish",
   ForAll([5,6,7,8,9], i -> Same(SubsV(E9(i) - ProjW(E9(i)), [0,0,0]), Z9)));
+
+#############################################################################
+Print("\n--- 16. Proposition 4.6 (descent when zeta is not in F) ---\n");
+##  sigma: zeta -> 1/zeta, acting on coordinates in the F-rational basis E.
+#############################################################################
+Sig := f -> Value(f, [zeta], [1/zeta]);;
+SigV := v -> List(v, Sig);;
+Report("sigma(s) = t and sigma(t) = s",
+  Same(SigV(s), t) and Same(SigV(t), s));
+Report("sigma omega sigma^-1 = chi (entrywise: sigma(matrix of omega) = matrix of chi)",
+  Same(List(Om, r -> List(r, Sig)), Ch));
+phi := v -> 4*(Om*SigV(v));;
+Report("phi = 4 omega sigma maps X into X",
+  RankMat(Concatenation(ImOm, [phi(u1)])) = 2 and RankMat(Concatenation(ImOm, [phi(u2)])) = 2);
+Report("phi^2 = id on X", Same(phi(phi(u1)), u1) and Same(phi(phi(u2)), u2));
+w1 := u1 + phi(u1);;  w2 := zeta*u1 + phi(zeta*u1);;
+Report("w1 = u2 and w2 = (zeta - 1/zeta) u1 + u2/zeta",
+  Same(w1, u2) and Same(w2, (zeta - 1/zeta)*u1 + u2/zeta));
+Report("w1, w2 are phi-fixed and linearly independent",
+  Same(phi(w1), w1) and Same(phi(w2), w2) and RankMat([w1, w2]) = 2);
+ss := Indeterminate(Rationals, "s");;  tt := Indeterminate(Rationals, "t");;
+QF := -2*beta*ss^2 + 4*(beta-2*psi)*ss*tt
+      + (8*alpha*(alpha-1) + 8*alpha*beta - 2*beta - 16*alpha*psi + 8*psi)*tt^2;;
+Report("Theta = 0:  Q(s w1 + t w2) = (zeta^2 - 1) Q_F(s,t)",
+  Same(Value(Qh, [xx, yy], [tt*(zeta - 1/zeta), ss + tt/zeta]), (zeta^2-1)*QF));
+Report("Q_F has coefficients in F (fixed by sigma)", Same(Value(QF, [zeta], [1/zeta]), QF));
+QF2 := Value(QF, [ss, tt], [1, 0]);;  QF0 := Value(QF, [ss, tt], [0, 1]);;
+QF1 := Value(QF, [ss, tt], [1, 1]) - QF2 - QF0;;
+Report("discriminant of Q_F = 64 (psi^2 - alpha beta gamma) on Theta = 0",
+  Same(QF1^2 - 4*QF2*QF0, 64*Subs(psi^2 - alpha*beta*gamma, [beta, gamTh0, psi])));
 
 Print("\nALL CHECKS PASSED: ", ForAll(results, x -> x = true), "\n");
