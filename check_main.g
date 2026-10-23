@@ -1,14 +1,14 @@
 #############################################################################
 ##  check_main.g
 ##
-##  Symbolic verification of the computations in Sections 3 and 4.1-4.3
-##  of the paper on ideals in 3-generated primitive axial algebras of
-##  Jordan type 1/2.  Part 0 checks the transcription of [GS, Tables 1
-##  and 5] (Table 1 of the paper) via the Frobenius property; Parts 1-5
-##  cover Section 3.1; Parts 6-15 cover Sections 3.4-3.7 and 4.1-4.3;
+##  Symbolic verification of the computations in Sections 3 and 4 of the
+##  paper on ideals in 3-generated primitive axial algebras of Jordan
+##  type 1/2.  Part 0 checks the transcription of [GS, Tables 1 and 5]
+##  (Table 1 of the paper) via the Frobenius property; Parts 1-5 cover
+##  Section 3.1; Parts 6-15 cover Sections 3.4-3.7 and 4.1-4.3;
 ##  Part 16 covers the descent result (Proposition 4.6).
-##  Section 4.4 is verified in check_hidden_toric.g, Example 4.5 in
-##  check_Remark_3_21.g, and Section 5 in check_Section_5_*.g.
+##  Example 4.5 is verified in check_Remark_3_21.g, Section 5 in
+##  check_hidden_toric.g, and Section 6 in check_Section_6_*.g.
 ##
 ##  Parameters: zeta, beta, gamma, psi are indeterminates, and
 ##      alpha = (zeta+1)^2/(4 zeta),
