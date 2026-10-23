@@ -1,21 +1,23 @@
-
 #############################################################################
-##  check_permutation_symmetry
+##  check_permutation_symmetry.g
 ##
-##  Verifies that the universal algebra A(alpha,beta,gamma,psi) of
-##  Gorshkov-Staroletov [J. Algebra 563 (2020), Table 1] is symmetric under
-##  permutations of the generators a,b,c:
+##  Verification of Remark 2.21 of the paper on ideals in 3-generated
+##  primitive axial algebras of Jordan type 1/2.
+##
+##  The universal algebra A(alpha,beta,gamma,psi) of Gorshkov-Staroletov
+##  [J. Algebra 563 (2020), Table 1] is symmetric under permutations of the
+##  generators a,b,c:
 ##
 ##    for every permutation s of {a,b,c}, the linear map phi_s sending
-##      g_k        -> g_{s(k)}            (generators)
-##      g_i g_j    -> g_{s(i)} g_{s(j)}   (products of two generators)
+##      g_k          -> g_{s(k)}                      (generators)
+##      g_i g_j      -> g_{s(i)} g_{s(j)}             (products of two generators)
 ##      g_k(g_i g_j) -> g_{s(k)}(g_{s(i)} g_{s(j)})   (triple products)
 ##    is an algebra isomorphism A(P) -> A(P'), where P' is obtained from
 ##    P = (alpha,beta,gamma,psi) by moving each pair parameter
 ##    (g_i,g_j) to the pair (g_{s(i)},g_{s(j)}), and psi' = psi.
 ##
-##  The parameters are indeterminates, so the check is symbolic (it holds
-##  for all parameter values, over every field of characteristic not 2).
+##  The parameters are indeterminates, so the check is symbolic: it holds
+##  for all parameter values, over every field of characteristic not 2.
 ##
 ##  Basis order (as in [GS, Table 1]):
 ##    1:a  2:b  3:c  4:ab  5:bc  6:ac  7:a(bc)  8:b(ac)  9:c(ab)
@@ -126,6 +128,14 @@ Mult := function(T, x, y)
   return z;
 end;;
 
+
+
+results := [];;
+Report := function(name, ok)
+  Add(results, ok);
+  Print(String(name, -62), " ", ok, "\n");
+end;;
+
 ## Index of the product of generators i,j (as a set) and of the triple
 ## product with outer generator k.
 PairIndex := function(i, j)
@@ -137,30 +147,28 @@ TripleIndex := k -> 6 + k;;   # 7:a(bc), 8:b(ac), 9:c(ab)
 
 ## Basis map induced by a permutation s of {1,2,3}.
 BasisImage := function(s)
-  local img;
-  img := [1^s, 2^s, 3^s,
+  return [1^s, 2^s, 3^s,
           PairIndex(1^s, 2^s), PairIndex(2^s, 3^s), PairIndex(1^s, 3^s),
           TripleIndex(1^s), TripleIndex(2^s), TripleIndex(3^s)];
-  return img;
 end;;
 
 ## Transported parameters: pair {i,j} of the source carries the same value
-## as pair {s(i),s(j)} of the target.
+## as pair {s(i),s(j)} of the target; psi is unchanged.
 TargetParams := function(s)
-  local val, pairs, src, P, k;
+  local src, P, k, pairs;
   # source values: {1,2}->alpha, {2,3}->beta, {1,3}->gamma
   src := [[[1,2], alpha], [[2,3], beta], [[1,3], gamma]];
   P := rec();
   for k in src do
-    val := k[2];
     pairs := Set([k[1][1]^s, k[1][2]^s]);
-    if pairs = [1,2] then P.al := val;
-    elif pairs = [2,3] then P.be := val;
-    else P.ga := val; fi;
+    if pairs = [1,2] then P.al := k[2];
+    elif pairs = [2,3] then P.be := k[2];
+    else P.ga := k[2]; fi;
   od;
   return [P.al, P.be, P.ga, psi];
 end;;
 
+## Apply the basis map img to a coordinate vector v.
 ApplyMap := function(img, v)
   local w, i;
   w := List([1..9], i -> Zero(v[1]));
@@ -168,8 +176,9 @@ ApplyMap := function(img, v)
   return w;
 end;;
 
+## Number of products e_i e_j (i,j = 1..9) with phi(e_i e_j) <> phi(e_i) phi(e_j).
 CheckPermutation := function(s)
-  local T, P2, T2, img, i, j, lhs, rhs, bad;
+  local T, P2, T2, img, i, j, bad;
   T   := MakeTable(alpha, beta, gamma, psi);
   P2  := TargetParams(s);
   T2  := MakeTable(P2[1], P2[2], P2[3], P2[4]);
@@ -177,10 +186,7 @@ CheckPermutation := function(s)
   bad := 0;
   for i in [1..9] do
     for j in [1..9] do
-      # phi(e_i e_j)  versus  phi(e_i) * phi(e_j) in the target algebra
-      lhs := ApplyMap(img, T[i][j]);
-      rhs := T2[img[i]][img[j]];
-      if lhs <> rhs then
+      if ApplyMap(img, T[i][j]) <> T2[img[i]][img[j]] then
         bad := bad + 1;
         Print("  mismatch at (", i, ",", j, ")\n");
       fi;
@@ -189,28 +195,22 @@ CheckPermutation := function(s)
   return bad;
 end;;
 
-## Sanity check of the table itself, at random rational parameter values:
-## the Jordan identity (x^2 y) x = x^2 (y x) on random elements, and the
-## eigenspace dimensions of ad_a.
+## Sanity check of the table itself, at fixed rational parameter values:
+## the Jordan identity (x^2 y) x = x^2 (y x) on sample elements, and the
+## spectrum of ad_a (eigenvalues 1, 0, 1/2 with multiplicities 1, 4, 4).
 SanityCheck := function()
-  local T, x, y, x2, ok, k, al, be, ga, ps, M;
+  local T, x, y, x2, ok, P, M;
   ok := true;
-  for k in [1..5] do
-    al := Random([-20..20])/Random([1..9]);
-    be := Random([-20..20])/Random([1..9]);
-    ga := Random([-20..20])/Random([1..9]);
-    ps := Random([-20..20])/Random([1..9]);
-    T := MakeTable(al, be, ga, ps);
-    x := List([1..9], i -> Random([-5..5]));
-    y := List([1..9], i -> Random([-5..5]));
+  for P in [[1/3, -2, 5/7, 3/4], [-4, 1/2, 2, -3/5], [7/2, 3, -1/9, 2]] do
+    T := MakeTable(P[1], P[2], P[3], P[4]);
+    x := [1, -2, 3, 0, 1, -1, 2, 1, -3];
+    y := [2, 1, -1, 3, 0, 2, -2, 1, 1];
     x2 := Mult(T, x, x);
     if Mult(T, Mult(T, x2, y), x) <> Mult(T, x2, Mult(T, y, x)) then
       ok := false;
     fi;
-    # ad_a must have eigenvalues 1,0,1/2 with multiplicities 1,4,4
-    M := List([1..9], j -> T[1][j]);   # rows: a*e_j
-    # ad_a is diagonalizable with eigenvalues 1,0,1/2 of multiplicities 1,4,4
-    # iff these three nullities are 1,4,4 (they then add up to 9)
+    M := List([1..9], j -> T[1][j]);   # rows: a * e_j
+    # the three nullities are 4, 1, 4 (they add up to 9, so ad_a is semisimple)
     if RankMat(M) <> 5 or RankMat(M - IdentityMat(9)) <> 8
        or RankMat(M - (1/2)*IdentityMat(9)) <> 5 then
       ok := false;
@@ -220,13 +220,15 @@ SanityCheck := function()
 end;;
 
 #############################################################################
-Print("Sanity check of [GS, Table 1] (Jordan identity, spectrum of ad_a): ",
-      SanityCheck(), "\n\n");
+Print("\n--- Sanity check of [GS, Table 1] ---\n");
+Report("Jordan identity and spectrum of ad_a at sample parameters", SanityCheck());
 
+Print("\n--- Remark 2.21: symmetry under the 6 permutations of a,b,c ---\n");
 for s in Elements(SymmetricGroup(3)) do
   Print("Permutation ", s, ": generators a,b,c -> ",
         List([1,2,3], k -> ["a","b","c"][k^s]),
         ", parameters (alpha,beta,gamma,psi) -> ", TargetParams(s), "\n");
-  Print("  number of mismatches: ", CheckPermutation(s), "\n");
+  Report("  phi_s is an isomorphism on all 81 products", CheckPermutation(s) = 0);
 od;
-Print("\nAll 6 permutations checked on all 81 products of basis elements.\n");
+
+Print("\nALL CHECKS PASSED: ", ForAll(results, x -> x = true), "\n");
