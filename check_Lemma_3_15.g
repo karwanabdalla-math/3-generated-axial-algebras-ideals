@@ -5,7 +5,7 @@
 ##  computations in Section 3.1, in the paper on ideals in 3-generated
 ##  primitive axial algebras of Jordan type 1/2.
 ##    Part 0:  the Frobenius form of [GS, Table 5]
-##    Part 1:  the toric basis {s, 1_B, t} of B (Proposition 2.23)
+##    Part 1:  the toric basis {s, 1_B, t} of B (Proposition 2.24)
 ##    Part 2:  the basis E of W, and omega, chi
 ##    Part 3:  Lemma 3.2
 ##    Part 4:  the bases of X and Y, chi(u_i) = nu v_i
@@ -196,7 +196,7 @@ Report("(a,a) = (b,b) = (c,c) = 1",
   ForAll([1,2,3], i -> Same(G[i][i], 1)));
 
 #############################################################################
-Print("\n--- 1. The toric basis {s, 1_B, t} of B (Proposition 2.23) ---\n");
+Print("\n--- 1. The toric basis {s, 1_B, t} of B (Proposition 2.24) ---\n");
 #############################################################################
 a := E9(1);; b := E9(2);; c := E9(3);; ab := E9(4);;
 one := (2/(alpha-1)) * (ab - a/2 - b/2);;          # 1_B
