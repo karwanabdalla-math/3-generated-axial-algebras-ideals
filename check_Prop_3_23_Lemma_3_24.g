@@ -374,6 +374,24 @@ Report("3. Lemma 3.24: Theta=0 => C_B(w) = -2 zeta Sigma/(zeta^2-1)^2 Phi(w) 1_B
   ForAll([1..6], i -> Same(SubsV(CBof(WBasis[i]), [beta,gamTh0,psi]),
       SubsV((-2*zeta*SigmaP/(zeta^2-1)^2) * PhiW(IdentityMat(6,alpha)[i]) * one,
             [beta,gamTh0,psi]))));
+## The change of basis in check 2 has denominators involving only zeta,
+## zeta-1, zeta+1 and powers of 2, so it specializes to every zeta <> 0,+-1
+## over every field of characteristic not 2.
+idx := [];;
+for i in [1..Length(Entries)] do
+  if RankMat(Entries{Concatenation(idx,[i])}) > Length(idx) then Add(idx, i); fi;
+od;
+Coeffs := Concatenation(List(Entries, e -> SolutionMat(Targets, e)),
+                        List(Targets, e -> SolutionMat(Entries{idx}, e)));;
+DenFactors := Set(Concatenation(List(Concatenation(Coeffs),
+  f -> List(Filtered(Factors(DenominatorOfRationalFunction(f)),
+                     p -> DegreeIndeterminate(p, zeta) > 0),
+            p -> p/LeadingCoefficient(p)))));;
+DenPrimes := Set(Concatenation(List(Concatenation(Coeffs), f ->
+  Concatenation(List(Filtered(CoefficientsOfUnivariatePolynomial(
+      DenominatorOfRationalFunction(f)), q -> q <> 0), q -> Factors(DenominatorRat(q)))))));;
+Report("2. the change of basis has poles only at zeta = 0, 1, -1, and only 2 in denominators",
+  IsSubset([zeta, zeta-1, zeta+1], DenFactors) and IsSubset([1,2], DenPrimes));
 
 
 Print("\nALL CHECKS PASSED: ", ForAll(results, x -> x = true), "\n");
