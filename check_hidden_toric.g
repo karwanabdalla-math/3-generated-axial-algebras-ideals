@@ -1,7 +1,7 @@
 #############################################################################
 ##  check_hidden_toric.g
 ##
-##  Verification of Section 4.5 (algebras with a hidden toric line).
+##  Verification of Section 5 (algebras with a hidden toric line).
 ##  Basis order as in [GS, Table 1] and check_main.g:
 ##    1:a  2:b  3:c  4:ab  5:bc  6:ac  7:p=a(bc)  8:q=b(ac)  9:r=c(ab)
 ##
@@ -12,6 +12,12 @@
 ##  Part 3: ideal lattices over GF(p) by the MeatAxe (cross-check).
 ##  Part 4: characteristic 3: the Miyamoto closure of {a,b,c} has no
 ##          toric pair, so the reduction does not apply there.
+##  Part 5: Corollary 5.2(a): w, I1, I2 as displayed; A w = 0; I1, I2 are
+##          ideals defined over Z[1/2]; dim(I1+I2) = 5 over every field of
+##          characteristic not 2; the transposition (a b) swaps I1 and I2.
+##
+##  Results verified: Lemma 5.1, Table 3, Corollary 5.2, Remark 5.3(a), and
+##  dim A^perp in Proposition 6.6 for the first four rows.
 #############################################################################
 
 ## Multiplication table of A(al,be,ga,ps) from [GS, Table 1]
@@ -185,6 +191,24 @@ Report("(a, b' c) = (b', ac) = (c, a b') = -psi + 2 beta gamma",
   Same(F(a, M(bp,c)), -ps + 2*be*ga) and Same(F(bp, M(a,c)), -ps + 2*be*ga)
   and Same(F(c, M(a,bp)), -ps + 2*be*ga));
 
+E9 := IdentityMat(9, Rationals);;
+IsPow2 := n -> n <> 0 and ForAll(Factors(AbsInt(n)), q -> q = 2);;
+OverZhalf := function(x)    # rational number with denominator a power of 2
+  return DenominatorRat(x) = 1 or IsPow2(DenominatorRat(x));
+end;;
+## stability under ad_a, ad_b, ad_c with coefficients in Z[1/2]
+IdealOverZhalf := function(T0, Bs)
+  return ForAll([1,2,3], x -> ForAll(Bs, v ->
+    ForAll(SolutionMat(Bs, Mult(T0, v, E9[x])), OverZhalf)));
+end;;
+## rank of an integer matrix is the same over Q and over every field of
+## odd characteristic: its nonzero elementary divisors are powers of 2
+RankOverZhalf := function(Bs)
+  local ed;
+  ed := Filtered(ElementaryDivisorsMat(Bs), d -> d <> 0);
+  if ForAll(ed, d -> d = 1 or IsPow2(d)) then return Length(ed); fi;
+  return fail;
+end;;
 #############################################################################
 Print("\n--- 2. The four algebras with a hidden toric line ---\n");
 #############################################################################
@@ -234,7 +258,8 @@ for C in Cases do
   x := C.trip(T0, G0);
   np := TripleParams(T0, G0, x);
   Print("\n(alpha,beta,gamma,psi) = ", P, ",  new triple ", C.name, "\n");
-  Report("  dim A^perp", 9 - RankMat(G0) = C.rad);
+  Report("  dim A^perp (the same over every field of characteristic not 2)",
+    9 - RankMat(G0) = C.rad and RankOverZhalf(64*G0) = 9 - C.rad);
   Report("  new axes are idempotents with (x,x) = 1",
     ForAll(x, y -> Same(Mult(T0,y,y), y) and Same(y*G0*y, 1)));
   Report("  psi' is well defined: (x1,x2x3) = (x2,x1x3) = (x3,x1x2)",
@@ -254,7 +279,7 @@ od;
 
 #############################################################################
 Print("\n--- 3. Cross-check: all ideals over GF(p) by the MeatAxe ---\n");
-##  By Lemma 3.5, ideals = subspaces invariant under ad_a, ad_b, ad_c.
+##  By Proposition 3.5, ideals = subspaces invariant under ad_a, ad_b, ad_c.
 ##  Predicted dimensions of ideals: S3: [0,1,3,3,5,9];  S1: [0,3,9].
 #############################################################################
 IdealDims := function(P, p)
@@ -299,9 +324,44 @@ for P in [[0,1,1,0], [1,1,1,-1]] do
   G3 := MakeGram(P[1],P[2],P[3],P[4])*one;
   AX := AxClosure(T3, G3, GF(3));
   vals := Set(List(Combinations([1..Length(AX)], 2), ij -> AX[ij[1]]*G3*AX[ij[2]]));
-  Print("  ", P, " over GF(3): ", Length(AX), " axes in the closure\n");
+  Report(Concatenation("  ", String(P), " over GF(3): the closure has 18 axes"), Length(AX) = 18);
   Report("    all pairwise form values lie in {0,1} (no toric pair)",
     IsSubset([Zero(GF(3)), One(GF(3))], vals));
+od;
+
+#############################################################################
+Print("\n--- 5. Case S3 when zeta is not in F: the two 3-dimensional ideals ---\n");
+##  For alpha' = 2, zeta' = 3 +- 2 sqrt 2, so zeta' need not lie in F
+##  (Remark 2.23, Proposition 4.6).  We exhibit both 3-dimensional ideals with
+##  integer coordinates and check that everything is defined over Z[1/2],
+##  hence over every field of characteristic not 2.
+#############################################################################
+S3data := [
+  rec(par := [0,0,0,-1/2],
+      w  := [1/2,1/2,1/2,-1,-1,-1,1,1,1],
+      I1 := [[1,0,0,-2,0,0,2,-2,2], [0,1,0,0,-2,0,2,2,-2], [0,0,1,0,0,-2,-2,2,2]],
+      I2 := [[1,0,0,0,0,-2,2,2,-2], [0,1,0,-2,0,0,-2,2,2], [0,0,1,0,-2,0,2,-2,2]]),
+  rec(par := [0,1,1,1/2],
+      w  := [0,0,1/2,-1,-1,-1,1,1,1],
+      I1 := [[0,1,0,0,0,0,2,-2,-2], [0,0,1,0,-2,0,-2,2,2], [0,0,0,1,0,1,-2,0,0]],
+      I2 := [[1,0,0,0,0,0,-2,2,-2], [0,0,1,0,0,-2,2,-2,2], [0,0,0,1,1,0,0,-2,0]])
+];;
+for D in S3data do
+  P := D.par;
+  T0 := MakeTable(P[1], P[2], P[3], P[4]);;
+  G0 := MakeGram(P[1], P[2], P[3], P[4]);;
+  Print("  ", P, "\n");
+  Report("    A w = 0 (w spans D0)", ForAll([1..9], i -> Same(Mult(T0, E9[i], D.w), 0*D.w)));
+  Report("    I1, I2 are ideals, with coefficients in Z[1/2]",
+    IdealOverZhalf(T0, D.I1) and IdealOverZhalf(T0, D.I2));
+  Report("    I1, I2 lie in A^perp", ForAll(Concatenation(D.I1, D.I2), v -> Same(v*G0, 0*v)));
+  Report("    w in I1 and w in I2",
+    SolutionMat(D.I1, D.w) <> fail and SolutionMat(D.I2, D.w) <> fail);
+  Report("    I1 + I2 has dim 5 over every field of char <> 2 (so = A^perp)",
+    RankOverZhalf(Concatenation(D.I1, D.I2)) = 5
+    and RankOverZhalf(D.I1) = 3 and RankOverZhalf(D.I2) = 3);
+  Report("    the transposition (a b) maps I1 onto I2",
+    RankMat(Concatenation(List(D.I1, v -> v{[2,1,3,4,6,5,8,7,9]}), D.I2)) = 3);
 od;
 
 Print("\nALL CHECKS PASSED: ", ForAll(results, x -> x = true), "\n");
