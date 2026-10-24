@@ -1,6 +1,6 @@
 #############################################################################
 ##  check_Section_4.g
-#
+##
 ##  Symbolic verification of Lemma 4.1, Lemma 4.2 and Example 4.4 in the
 ##  paper on ideals in 3-generated primitive axial algebras of Jordan
 ##  type 1/2.  The setup (Sections 2-3.1, Lemma 3.15) is checked silently
@@ -9,7 +9,7 @@
 ##                 c_B^2 = N c_B + (4P - N^2/4) 1_B,
 ##                 where N = (1_B, c) and P = (s,c)(t,c);
 ##    Lemma 4.2:   if c_B = d_xi, the relations of Proposition 3.18 hold
-##                 at [x:y] = [-(1 + zeta xi) : 1];
+##                 at [x:y] = [-(1 + zeta xi) : 1], and y(x+y) = -zeta xi;
 ##    Example 4.4: zeta = 2, [x:y] = [-2:1] gives beta = 1,
 ##                 gamma = psi = 9/8 and Theta = Sigma = 0.
 ##
@@ -340,6 +340,7 @@ Report("eq. (1): e4,e5-coordinates of C_W(w) are (w4-w5)/4, -(w4-w5)/4",
   ForAll([1..6], i -> Same(CW[4][i], [0,0,0,1/4,-1/4,0][i])
                   and Same(CW[5][i], [0,0,0,-1/4,1/4,0][i])));
 
+
 QUIET := false;;
 Print("\nSetup (Sections 2-3.1, Lemma 3.15) verified: ", ForAll(results, x -> x = true), "\n");
 Print("\n--- Lemma 4.1 ---\n");
@@ -351,7 +352,7 @@ Report("Sigma = alpha(alpha-1)(16 P - N^2)/4",
   Same(SigmaP, alpha*(alpha-1)*(16*PPc - NNc^2)/4));
 Report("c_B^2 = N c_B + (4P - N^2/4) 1_B",
   Same(M(cB,cB), NNc*cB + (4*PPc - NNc^2/4)*one));
-Report("d_xi = xi s + 1_B/2 + t/xi is an idempotent of B (Prop 2.23)",
+Report("d_xi = xi s + 1_B/2 + t/xi is an idempotent of B (Prop 2.24)",
   Same(M(xi*s + one/2 + t/xi, xi*s + one/2 + t/xi), xi*s + one/2 + t/xi));
 
 Print("\n--- Lemma 4.2 and Example 4.4 ---\n");
@@ -360,10 +361,11 @@ bxi := pairing(1/zeta, xi);;  gxi := pairing(1, xi);;
 pxi := (bxi + gxi + alpha - 1)/2;;
 Xxi := -(1 + zeta*xi);;
 Report("torus parameters satisfy Theta = Sigma = 0",
-  Same(Value(Subs(ThetaP,[bxi,gxi,pxi]),[xx],[Xxi]), 0)
-  and Same(Subs(SigmaP,[bxi,gxi,pxi]), 0));
+  Same(Subs(ThetaP,[bxi,gxi,pxi]), 0) and Same(Subs(SigmaP,[bxi,gxi,pxi]), 0));
 Report("Lemma 4.2: relations of Prop 3.18 hold at [x:y] = [-(1+zeta xi):1]",
   ForAll([1..3], i -> Same(Value(Mvals[i],[xx],[Xxi]), [bxi,gxi,pxi][i])));
+Report("Lemma 4.2: y(x+y) = -zeta xi at [x:y] = [-(1+zeta xi):1]",
+  Same(1*(Xxi + 1), -zeta*xi));
 Report("Lemma 4.2: c_B = d_xi for these parameters",
   Same(SubsV(cB, [bxi,gxi,pxi]), xi*s + one/2 + t/xi));
 ex := List(Mvals, f -> Value(f, [zeta, xx], [2, -2]));;
@@ -371,6 +373,5 @@ Report("Example 4.4: zeta=2, [x:y]=[-2:1] gives beta=1, gamma=psi=9/8",
   Same(ex, [1, 9/8, 9/8]));
 Report("Example 4.4: Theta = Sigma = 0",
   Same(Value(Subs(ThetaP, ex),[zeta],[2]), 0) and Same(Value(Subs(SigmaP, ex),[zeta],[2]), 0));
-
 
 Print("\nALL CHECKS PASSED: ", ForAll(results, x -> x = true), "\n");
