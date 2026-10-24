@@ -1,5 +1,21 @@
 #############################################################################
-##  check_Section_5_2.g -- Section 5.2: radicals of the remaining algebras
+##  check_Section_6_2.g
+##
+##  Verification of Section 6.2 (the remaining algebras) in the paper on
+##  ideals in 3-generated primitive axial algebras of Jordan type 1/2:
+##
+##    Proposition 6.6:  dim A^perp = 6, 7, 8, 3, 3 for
+##                      (0,0,0,0), (0,0,1,0), (1,1,1,1), (0,1,1,0), (1,1,1,-1),
+##                      over every field of characteristic not 2
+##                      (64 times the Gram matrix has nonzero elementary
+##                      divisors that are powers of 2);
+##    Proposition 6.8:  ab, ac, bc in A^perp for (0,0,0,0);
+##                      c - a, ab in A^perp for (0,0,1,0);
+##                      b - a, c - a in A^perp for (1,1,1,1);
+##                      and the images of the axes span A/A^perp.
+##
+##  The remaining two rows of Proposition 6.6, (0,0,0,-1/2) and (0,1,1,1/2),
+##  are verified in check_hidden_toric.g.
 ##
 ##  Basis order as in [GS, Table 1] and check_main.g:
 ##    1:a  2:b  3:c  4:ab  5:bc  6:ac  7:p=a(bc)  8:q=b(ac)  9:r=c(ab)
@@ -141,10 +157,28 @@ RankOverZhalf := function(Bs)
 end;;
 G0 := 0;; S := 0;;
 Five := [ [[0,0,0,0],6], [[0,0,1,0],7], [[1,1,1,1],8], [[0,1,1,0],3], [[1,1,1,-1],3] ];;
+Print("\n--- Proposition 6.6 ---\n");
 for S in Five do
   G0 := MakeGram(S[1][1], S[1][2], S[1][3], S[1][4]);
   Report(Concatenation(String(S[1]), ": dim A^perp = ", String(S[2]),
                        " in every odd characteristic"),
     RankOverZhalf(G0*64) = 9 - S[2]);
 od;
+Print("\n--- Proposition 6.8 ---\n");
+## elements of A^perp used to identify A/A^perp
+E9 := IdentityMat(9, Rationals);;
+InPerp := function(P, v) return IsZero(v*MakeGram(P[1],P[2],P[3],P[4])); end;;
+Report("(0,0,0,0): ab, ac, bc lie in A^perp",
+  ForAll([E9[4], E9[6], E9[5]], v -> InPerp([0,0,0,0], v)));
+Report("(0,0,1,0): c - a and ab lie in A^perp",
+  InPerp([0,0,1,0], E9[3]-E9[1]) and InPerp([0,0,1,0], E9[4]));
+Report("(1,1,1,1): b - a and c - a lie in A^perp",
+  InPerp([1,1,1,1], E9[2]-E9[1]) and InPerp([1,1,1,1], E9[3]-E9[1]));
+
+Report("(0,0,0,0): A = <a,b,c> + A^perp",
+  RankMat(Concatenation([E9[1],E9[2],E9[3]], NullspaceMat(MakeGram(0,0,0,0)))) = 9);
+Report("(0,0,1,0): A = <a,b> + A^perp",
+  RankMat(Concatenation([E9[1],E9[2]], NullspaceMat(MakeGram(0,0,1,0)))) = 9);
+Report("(1,1,1,1): A = <a> + A^perp",
+  RankMat(Concatenation([E9[1]], NullspaceMat(MakeGram(1,1,1,1)))) = 9);
 Print("\nALL CHECKS PASSED: ", ForAll(results, x -> x = true), "\n");
