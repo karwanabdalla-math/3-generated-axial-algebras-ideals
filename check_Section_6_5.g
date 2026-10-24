@@ -1,5 +1,20 @@
 #############################################################################
-##  check_Section_5_5.g  --  Section 5.5: the algebra (1,1,1,1).
+##  check_Section_6_5.g
+##
+##  Verification of Section 6.5 (the algebra (1,1,1,1)) in the paper on
+##  ideals in 3-generated primitive axial algebras of Jordan type 1/2:
+##    - Lemma 6.18: P_a, P_b, P_c, kappa_a, kappa_b, kappa_c, b-a, c-a is a
+##      basis of A^perp over every field of characteristic not 2, A w = 0,
+##      and the action formulas, with x d = d/2 + rho_x(d) symbolically in
+##      t_a, t_b, t_c;
+##    - Delta(d): the vectors rho_x(d) - rho_y(d) satisfy
+##      t_a^2 s_a + t_b^2 s_b + t_c^2 s_c = 0, and their 2x2 minors are
+##      -2 t_a^2, -2 t_b^2, -2 t_c^2;
+##    - the ideals M_m: the identities for m - mu_c w, m - mu_b w and the
+##      products a u_m, b u_m, c u_m, x m, symbolically in mu_a, mu_b, mu_c;
+##    - the ideals Q_d: x(d + 2 rho_a(d)) lies in Q_d;
+##    - the number of ideals over GF(q), q = 3, 5, 7, 11: 1, 1, q+1, q+2,
+##      q^2+q+1, q^2+q+1, q+2, q+1, 1, 1 in dimensions 0, ..., 9.
 ##
 ##  Basis order as in [GS, Table 1] and check_main.g:
 ##    1:a  2:b  3:c  4:ab  5:bc  6:ac  7:p=a(bc)  8:q=b(ac)  9:r=c(ab)
@@ -132,10 +147,7 @@ end;;
 
 
 
-#############################################################################
-##  check_Section_5_5.g  --  Section 5.5: the algebra (1,1,1,1).
-##  Basis order: 1:a 2:b 3:c 4:ab 5:bc 6:ac 7:p 8:q 9:r
-#############################################################################
+Print("\n--- Section 6.5: the algebra (1,1,1,1) ---\n");
 E9 := IdentityMat(9, Rationals);;
 a := E9[1];; b := E9[2];; c := E9[3];; ab := E9[4];; bc := E9[5];; ac := E9[6];;
 p := E9[7];; q := E9[8];; r := E9[9];;
@@ -178,17 +190,16 @@ Report("x kappa_x = P_x, x kappa_y = 0 (y <> x)",
     M(X3[i], K3[j]) = KroneckerDelta(i,j)*P3[i])));
 d := ta*X3[1] + tb*X3[2] + tc*X3[3];;
 t := [ta, tb, tc];;
-psi := function(i) local j, k;            # t_y kappa_z + t_z kappa_y
+rho := function(i) local j, k;            # rho_x(d) = t_y kappa_z + t_z kappa_y
   j := First([1..3], x -> x <> i);  k := First([1..3], x -> x <> i and x <> j);
   return t[j]*K3[k] + t[k]*K3[j];
 end;;
 Report("x d = d/2 + rho_x(d), rho_x(d) = t_y kappa_z + t_z kappa_y (symbolic in t)",
-  ForAll([1..3], i -> M(X3[i], d) = d/2 + psi(i)));
+  ForAll([1..3], i -> M(X3[i], d) = d/2 + rho(i)));
 ## Delta(d)
-v1 := psi(1) - psi(2);;  v2 := psi(1) - psi(3);;
-Co := v -> List(K3, k -> SolutionMat(K3, v)[Position(K3, k)]);;
+v1 := rho(1) - rho(2);;  v2 := rho(1) - rho(3);;
 c1 := SolutionMat(K3, v1);;  c2 := SolutionMat(K3, v2);;
-Report("Delta(d): rho_x(d) - psi_y(d) satisfy sum t_x^2 s_x = 0",
+Report("Delta(d): rho_x(d) - rho_y(d) satisfy sum t_x^2 s_x = 0",
   IsZero(c1*List(t, x -> x^2)) and IsZero(c2*List(t, x -> x^2)));
 Report("the 2x2 minors of (rho_a - rho_b; rho_a - rho_c) are -2(ta^2, tb^2, tc^2)",
   [c1[2]*c2[3]-c1[3]*c2[2], c1[3]*c2[1]-c1[1]*c2[3], c1[1]*c2[2]-c1[2]*c2[1]]
@@ -209,8 +220,8 @@ Report("x m = m/2 - (sum of the other two coefficients) w/4",
 ## Q_d: x (d + 2 rho_a(d)) = (d + 2 rho_a(d))/2 + (rho_x(d) - rho_a(d)) + element of P
 Report("x(d + 2 rho_a(d)) - (d + 2 rho_a(d))/2 - (rho_x(d) - rho_a(d)) lies in P",
   ForAll([1..3], i -> SolutionMat(P3,
-    M(X3[i], d + 2*psi(1)) - (d + 2*psi(1))/2 - (psi(i) - psi(1))) <> fail));
-## cross-check: number of ideals of each dimension over GF(q)
+    M(X3[i], d + 2*rho(1)) - (d + 2*rho(1))/2 - (rho(i) - rho(1))) <> fail));
+## number of ideals of each dimension over GF(q) (stated after Theorem 6.17)
 for pr in [3, 5, 7, 11] do
   one := One(GF(pr));
   mats := List([1,2,3], k -> List([1..9], i -> T0[i][k]) * one);
