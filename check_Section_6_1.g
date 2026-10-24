@@ -1,5 +1,15 @@
 #############################################################################
-##  (shared setup)
+##  check_Section_6_1.g
+##
+##  Verification of Section 6.1 (general tools) in the paper on ideals in
+##  3-generated primitive axial algebras of Jordan type 1/2:
+##
+##    Lemma 6.3:  for x <> y in {a,b,c},   y(xy) = ((x,y) y + xy)/2,
+##
+##  symbolically in alpha, beta, gamma, psi (so for all parameter values,
+##  over every field of characteristic not 2).  The other results of
+##  Section 6.1 (Lemma 6.1, Corollaries 6.2 and 6.4, Lemma 6.5) are proved
+##  by hand in the paper.
 ##
 ##  Basis order as in [GS, Table 1] and check_main.g:
 ##    1:a  2:b  3:c  4:ab  5:bc  6:ac  7:p=a(bc)  8:q=b(ac)  9:r=c(ab)
@@ -133,8 +143,7 @@ end;;
 
 
 #############################################################################
-##  check_Section_5_1.g  --  Section 5.1: the connectivity lemma (Lemma 5.3).
-##  Basis order: 1:a 2:b 3:c 4:ab 5:bc 6:ac 7:p 8:q 9:r
+Print("\n--- Lemma 6.3 ---\n");
 #############################################################################
 E9 := IdentityMat(9, Rationals);;
 a := E9[1];; b := E9[2];; c := E9[3];; ab := E9[4];; bc := E9[5];; ac := E9[6];;
@@ -148,12 +157,12 @@ RankOverZhalf := function(Bs)
   if ForAll(ed, d -> d = 1 or IsPow2(d)) then return Length(ed); fi;
   return fail;
 end;;
-## Lemma 5.1: y(xy) = ((x,y) y + xy)/2 for x <> y in {a,b,c}, symbolically
+## Lemma 6.3: y(xy) = ((x,y) y + xy)/2 for x <> y in {a,b,c}, symbolically
 al := Indeterminate(Rationals, "alpha");; be := Indeterminate(Rationals, "beta");;
 ga := Indeterminate(Rationals, "gamma");; ps := Indeterminate(Rationals, "psi");;
 Tg := MakeTable(al, be, ga, ps);;  Gg := MakeGram(al, be, ga, ps);;
 Eg := IdentityMat(9, al);;
-Report("Lemma 5.3: y(xy) = ((x,y)y + xy)/2 for all x <> y in {a,b,c}",
+Report("Lemma 6.3: y(xy) = ((x,y)y + xy)/2 for all x <> y in {a,b,c}",
   ForAll(Filtered(Cartesian([1..3],[1..3]), t -> t[1] <> t[2]), t ->
     Same(Mult(Tg, Eg[t[2]], Mult(Tg, Eg[t[1]], Eg[t[2]])),
          ((Eg[t[1]]*Gg*Eg[t[2]])*Eg[t[2]] + Mult(Tg, Eg[t[1]], Eg[t[2]]))/2)));
