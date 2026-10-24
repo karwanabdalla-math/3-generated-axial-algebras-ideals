@@ -1,6 +1,20 @@
 #############################################################################
-##  check_Section_6_6.g  --  Section 6.6: the algebras (0,1,1,0) and (1,1,1,-1),
-##  including the toric line in characteristic 3.
+##  check_Section_6_6.g
+##
+##  Verification of Section 6.6 (the algebras (0,1,1,0) and (1,1,1,-1)) in
+##  the paper on ideals in 3-generated primitive axial algebras of Jordan
+##  type 1/2:
+##    - Lemma 6.3 (used through Corollary 6.4 in Theorem 6.22), symbolically;
+##    - Theorem 6.22: the bases of A^perp over every field of characteristic
+##      not 2, the matrices of ad_a, ad_b, ad_c on A^perp, and the
+##      determinants 2^-14 and -2^-8 showing that 9 words in L_a, L_b, L_c
+##      span End(A^perp);
+##    - Proposition 6.23: over GF(3), c and y are primitive axes of Jordan
+##      type 1/2 (full fusion law), (c,y) = -1, <<c,y>> is 3-dimensional,
+##      and a, c, y generate A;
+##    - Proposition 6.24 (cross-check over GF(p), p <= 19): every simple A
+##      with alpha, beta, gamma in {0,1} has a Miyamoto toric pair, or
+##      psi^2 - alpha beta gamma is a nonzero square.
 ##
 ##  Basis order as in [GS, Table 1] and check_main.g:
 ##    1:a  2:b  3:c  4:ab  5:bc  6:ac  7:p=a(bc)  8:q=b(ac)  9:r=c(ab)
@@ -133,11 +147,7 @@ end;;
 
 
 
-#############################################################################
-##  check_Section_6_6.g  --  Section 6.6:
-##  the algebras (0,1,1,0) and (1,1,1,-1).
-##  Basis order: 1:a 2:b 3:c 4:ab 5:bc 6:ac 7:p 8:q 9:r
-#############################################################################
+Print("\n--- Lemma 6.3 ---\n");
 E9 := IdentityMat(9, Rationals);;
 a := E9[1];; b := E9[2];; c := E9[3];; ab := E9[4];; bc := E9[5];; ac := E9[6];;
 p := E9[7];; q := E9[8];; r := E9[9];;
@@ -160,6 +170,7 @@ Report("Lemma 6.3: y(xy) = ((x,y)y + xy)/2 for all x <> y in {a,b,c}",
     Same(Mult(Tg, Eg[t[2]], Mult(Tg, Eg[t[1]], Eg[t[2]])),
          ((Eg[t[1]]*Gg*Eg[t[2]])*Eg[t[2]] + Mult(Tg, Eg[t[1]], Eg[t[2]]))/2)));
 
+Print("\n--- Theorem 6.22 ---");
 T0 := 0;; G0 := 0;; D := 0;; Ms := 0;;
 Data := [
   rec(par := [0,1,1,0], R := [ab, q-p, r],
@@ -187,6 +198,7 @@ for D in Data do
   Report("  the 9 words span End(A^perp): determinant as stated (a power of 2)",
     DeterminantMat(List(D.words, w -> Flat(Product(List(w, i -> Ms[i]), IdentityMat(3))))) = D.det);
 od;
+Print("\n\n--- Proposition 6.23 ---");
 ## Proposition 6.23: in characteristic 3, both algebras contain a toric line.
 ## y is a primitive axis of Jordan type 1/2 over GF(3) (full fusion law),
 ## (c,y) = -1, <<c,y>> is 3-dimensional, and a, c, y generate A.
@@ -240,9 +252,10 @@ od;
 ## then either some Miyamoto image tau_x(z) gives (y, tau_x(z)) not in {0,1},
 ## or psi^2 - alpha beta gamma is a nonzero square (so A = M_3(F)^+).
 ## Checked over GF(p) for p = 3, 5, ..., 19.
+Print("\n\n--- Proposition 6.24 (cross-check) ---\n");
 Fp := 0;; op := 0;; ok := 0;; vals := 0;; dd := 0;;
-for p in [3,5,7,11,13,17,19] do
-  Fp := GF(p);  op := One(Fp);  ok := true;
+for pp in [3,5,7,11,13,17,19] do
+  Fp := GF(pp);  op := One(Fp);  ok := true;
   for al in [0,1] do for be in [0,1] do for ga in [0,1] do for ps in Elements(Fp) do
     if not IsZero((al+be+ga-1)*op - 2*ps) and not IsZero(al*be*ga*op - ps^2) then
       vals := [ be*op - 4*ps + 4*al*ga*op, ga*op - 4*ps + 4*al*be*op,
@@ -253,7 +266,7 @@ for p in [3,5,7,11,13,17,19] do
       fi;
     fi;
   od; od; od; od;
-  Report(Concatenation("GF(", String(p), "): simple cases without a Miyamoto toric pair have psi^2-abc a square"), ok);
+  Report(Concatenation("GF(", String(pp), "): simple cases without a Miyamoto toric pair have psi^2-abc a square"), ok);
 od;
 
 Print("\nALL CHECKS PASSED: ", ForAll(results, x -> x = true), "\n");
