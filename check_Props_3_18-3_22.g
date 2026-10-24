@@ -6,8 +6,19 @@
 ##  in 3-generated primitive axial algebras of Jordan type 1/2.
 ##  The setup (Sections 2-3.1, Lemma 3.15) is checked silently first; it
 ##  is verified in detail in check_Lemma_3_15.g.
-##    Part A:  C_W-stability of each candidate <=> the stated conditions
+##    Part A:  C_W-stability of each candidate <=> the stated conditions,
+##             at a generic point [x:1]
 ##    Part B:  C_B = 0 on the stated loci, and Theta = Sigma = 0
+##    Part C:  the equivalences hold at EVERY point [x:y], not only at a
+##             generic one:
+##             C1  the C_W-condition never degenerates (its rank is
+##                 constant in x);
+##             C2  the stated condition implies the C_W-condition, with
+##                 coefficients whose only poles are at the special points
+##                 x = 0, -1, zeta-1 and (x+1)^2 = zeta;
+##             C3  the special points, and the point [1:0], checked directly;
+##             C4  C_B = 0 at the special points of eq. (2), and on
+##                 D0+M_[x:y] and D0+D1+M_[x:y] for all x.
 ##
 ##  Parameters: zeta, beta, gamma, psi are indeterminates, and
 ##      alpha = (zeta+1)^2/(4 zeta),
@@ -336,9 +347,10 @@ Report("eq. (1): e4,e5-coordinates of C_W(w) are (w4-w5)/4, -(w4-w5)/4",
   ForAll([1..6], i -> Same(CW[4][i], [0,0,0,1/4,-1/4,0][i])
                   and Same(CW[5][i], [0,0,0,-1/4,1/4,0][i])));
 
+
 QUIET := false;;
 Print("\nSetup (Sections 2-3.1, Lemma 3.15) verified: ", ForAll(results, x -> x = true), "\n");
-Print("\n--- A. C_W-stability at the points [x:1] ---\n");
+Print("\n--- A. C_W-stability at a generic point [x:1] ---\n");
 hX := zeta - 1 - xx;;                               # h for y = 1
 uX := xx*u1 + u2;;   vX := xx*v1 + v2;;
 LinRows := function(gens)
@@ -411,5 +423,128 @@ sol := SolutionMat(TransposedMat([ThRow{[1,2]}, QRow{[1,2]}]),
 D0Mvals := [sol[1], sol[2], psi];;
 Report("Prop 3.20: C_B(D0+M_[x:y]) = 0 on Theta = Q = 0",
   CBzero([g,uX,vX], D0Mvals));
+
+Print("\n--- C. The equivalences hold at every point [x:y] ---\n");
+## The C_W-condition for a subspace spanned by gens (k vectors, independent
+## for every x) is: all (k+1)-minors of [gens; C_W(w)] vanish, w in gens.
+## These minors are affine-linear in (beta,gamma,psi) and polynomial in x,
+## so the rows below are valid at every specialization of x.
+SubsM := function(Mx, vals)
+  return List(Mx, r -> List(r, f -> Value(f, [beta,gamma,psi], vals)));
+end;;
+CW0 := SubsM(CW,[0,0,0]);;
+CWb := SubsM(CW,[1,0,0]) - CW0;;  CWg := SubsM(CW,[0,1,0]) - CW0;;
+CWp := SubsM(CW,[0,0,1]) - CW0;;
+Report("C_W is affine-linear in (beta,gamma,psi)",
+  Same(CW, CW0 + beta*CWb + gamma*CWg + psi*CWp));
+MinorRows := function(gens)
+  local k, rows, w, cols, Dt;
+  k := Length(gens);  rows := [];
+  Dt := function(last, cols)
+    return DeterminantMat(List(Concatenation(gens, [last]), r -> r{cols}));
+  end;
+  for w in gens do
+    for cols in Combinations([1..6], k+1) do
+      Add(rows, [Dt(CWb*w,cols), Dt(CWg*w,cols), Dt(CWp*w,cols), Dt(CW0*w,cols)]);
+    od;
+  od;
+  return Filtered(rows, r -> not IsZero(r));
+end;;
+## homogeneous versions of the stated conditions at a point [x0:y0]
+StatedM := function(x0,y0) local h; h := y0*(zeta-1)-x0;
+  return One(alpha)*[[4*y0*(x0+y0),0,0,x0^2],[0,4*zeta*y0*(x0+y0),0,h^2],
+                     [0,0,8*zeta*y0*(x0+y0),-x0*(zeta+1)*h]]; end;;
+StatedD1 := function(x0,y0) local h; h := y0*(zeta-1)-x0;
+  return One(alpha)*[[(zeta+1)*h,0,2*zeta*x0,0],[0,(zeta+1)*x0,2*h,0]]; end;;
+StatedD0 := function(x0,y0) local h; h := y0*(zeta-1)-x0;
+  return One(alpha)*[[1,1,-2,alpha-1],
+         [2*((x0+y0)^2-zeta^2*y0^2),-2*zeta*x0*(x0+2*y0),0,-x0*(zeta-1)*h]]; end;;
+Incons := R -> RankMat(List(R, r -> r{[1..3]})) < RankMat(R);;
+SameSolutions := function(R1, R2)      # same solution set in (beta,gamma,psi)
+  if Incons(R1) or Incons(R2) then return Incons(R1) and Incons(R2); fi;
+  return RankMat(R1) = RankMat(R2) and RankMat(R1) = RankMat(Concatenation(R1,R2));
+end;;
+GcdMinors := function(R, r, maxrows)   # gcd of r x r minors of the first rows
+  local gg, S, cols, d;
+  gg := Zero(xx);
+  for S in Combinations([1..Minimum(Length(R), maxrows)], r) do
+    for cols in Combinations([1..4], r) do
+      d := DeterminantMat(List(R{S}, x -> x{cols}));
+      if not IsZero(d) then
+        if IsZero(gg) then gg := NumeratorOfRationalFunction(d);
+        else gg := Gcd(gg, NumeratorOfRationalFunction(d)); fi;
+        if DegreeIndeterminate(gg, xx) = 0 then return gg; fi;
+      fi;
+    od;
+  od;
+  return gg;
+end;;
+PoleFactors := function(A, B)          # x-dependent poles when writing rows of A via rows of B
+  local dens, r, sol, f;
+  dens := [];
+  for r in A do
+    sol := SolutionMat(B, r);
+    if sol = fail then return fail; fi;
+    for f in sol do
+      Append(dens, Filtered(Factors(DenominatorOfRationalFunction(f)),
+                            p -> DegreeIndeterminate(p, xx) > 0));
+    od;
+  od;
+  return dens;
+end;;
+## The special points: every pole must be a constant multiple of one of
+## x, x+1, zeta-1-x, x^2+2x+1-zeta; all of these points are checked in C3.
+Special := [xx, xx+1, zeta-1-xx, xx^2+2*xx+1-zeta];;
+IsConstX := f -> DegreeIndeterminate(NumeratorOfRationalFunction(f), xx) = 0
+                 and DegreeIndeterminate(DenominatorOfRationalFunction(f), xx) = 0;;
+OnlySpecial := dens -> dens <> fail and
+  ForAll(dens, p -> ForAny(Special, q -> IsConstX(p/q)));;
+GensAt := function(kind, x0, y0)
+  local uP, vP;
+  uP := x0*u1 + y0*u2;  vP := x0*v1 + y0*v2;
+  if kind = 1 then return [uP, vP];
+  elif kind = 2 then return [d2, uP, vP];
+  elif kind = 3 then return [g, uP, vP];
+  else return [d1, d2, uP, vP]; fi;
+end;;
+Cases := [ ["M_[x:y]",       1, MRows,         3, StatedM ],
+           ["D1+M_[x:y]",    2, D1MRows,       2, StatedD1],
+           ["D0+M_[x:y]",    3, [ThRow, QRow], 2, StatedD0],
+           ["D0+D1+M_[x:y]", 4, MRows,         3, StatedM ] ];;
+for C in Cases do
+  R1 := MinorRows(GensAt(C[2], xx, 1));
+  Report(Concatenation("C1 ", C[1], ": rank of the condition is constant in x"),
+    RankMat(R1) = C[4] and DegreeIndeterminate(GcdMinors(R1, C[4], 25), xx) = 0);
+  Report(Concatenation("C2 ", C[1], ": stated => C_W-stable, poles only at special x"),
+    OnlySpecial(PoleFactors(R1, C[3])));
+  for P in [[1,0],[-1,1],[0,1],[zeta-1,1]] do
+    Report(Concatenation("C3 ", C[1], " at [x:y] = [", String(P[1]), ":", String(P[2]), "]"),
+      SameSolutions(MinorRows(GensAt(C[2], P[1], P[2])), C[5](P[1], P[2])));
+  od;
+od;
+## the points (x+1)^2 = zeta, which occur as poles only for D0+M_[x:y]:
+## put zeta = sq^2 and x = -1 +- sq
+sq := Indeterminate(Rationals, "sq");;
+Sp2 := function(f, x0)
+  if IsRat(f) then return f*One(sq); fi;
+  return Value(NumeratorOfRationalFunction(f), [zeta, xx], [sq^2, x0]) /
+         Value(DenominatorOfRationalFunction(f), [zeta, xx], [sq^2, x0]) * One(sq);
+end;;
+R1 := MinorRows(GensAt(3, xx, 1));;
+for x0 in [sq-1, -sq-1] do
+  Report(Concatenation("C3 D0+M_[x:y] at x = ", String(x0), ", zeta = sq^2"),
+    SameSolutions(List(R1, r -> List(r, f -> Sp2(f, x0))),
+                  List([ThRow, QRow], r -> List(r, f -> Sp2(f, x0)))));
+od;
+
+## C4: C_B at the special points of eq. (2), and on D0+M_[x:y] for all x
+Report("C4 Prop 3.19 at [zeta-1:1]: C_B = 0 when gamma = psi = 0 (beta free)",
+  CBzero(GensAt(2, zeta-1, 1), [beta, 0, 0]));
+Report("C4 Prop 3.19 at [1:0]: C_B = 0 when beta = zeta gamma, psi = (zeta+1) gamma/2",
+  CBzero(GensAt(2, 1, 0), [zeta*gamma, gamma, (zeta+1)*gamma/2]));
+Report("C4 Prop 3.20: C_B(D0+M_[x:y]) = 0 for all x when Theta = 0",
+  CBzero(GensAt(3, xx, 1), [beta, gamTh0, psi]));
+Report("C4 Prop 3.22: C_B(D0+D1+M_[x:y]) = 0 on the locus of Prop 3.18",
+  CBzero(GensAt(4, xx, 1), Mvals));
 
 Print("\nALL CHECKS PASSED: ", ForAll(results, x -> x = true), "\n");
